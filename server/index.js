@@ -8,12 +8,12 @@ const app = express()
 const server = http.createServer(app)
 const io = socketIo(server, {
     cors: {
-      origin: 'http://localhost:3000',
+      origin: 'http://localhost:5173',
       methods: ['GET', 'POST']
     }
   });
 
-app.use(express.static('public'));
+app.use(express.static('../frontend/public/'));
 
 const mongoDBURL = 'mongodb://localhost:27017/chat';
 
@@ -82,6 +82,6 @@ io.on('connection', socket => {
     })
 })
 
-server.listen(3000, () => {
-    console.log("server running on port 3000")
+server.listen(3001, () => {
+    console.log("server running on port 3001")
 })
