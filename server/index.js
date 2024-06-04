@@ -1,87 +1,38 @@
-const express = require('express')
-const mongoose = require('mongoose')
-const http = require('http');
-const socketIo =  require('socket.io');
-const cors = require('cors')
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import http from 'http';
+import { Server as SocketIo } from 'socket.io';
+import authRoutes from './routes/auth.js';
 
-const app = express()
-const server = http.createServer(app)
-const io = socketIo(server, {
-    cors: {
-      origin: 'http://localhost:5173',
-      methods: ['GET', 'POST']
-    }
-  });
 
-app.use(express.static('../frontend/public/'));
+const app = express();
 
-const mongoDBURL = 'mongodb://localhost:27017/chat';
+// Configuração CORS
+app.use(cors({
+    origin: 'http://localhost:3000',  // URL do seu frontend Next.js
+    methods: ['GET', 'POST']
+}));
 
-(async () => {
-    try {
-        await mongoose.connect(mongoDBURL, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    })
-        console.log("connection sucessful")
-    } catch(error) {
-        console.error("Received an error", error)
-        process.exit(1)
-    }
-})()
-
-const Schema = mongoose.Schema
-
-const mySchema = new Schema ({
-    from: String,
-    to: String,
-    message: String
-})
-
-const Message = mongoose.model('Message', mySchema)
+// Conectar ao MongoDB
+mongoose.connect('mongodb://localhost:27017/users', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 app.use(express.json());
+app.use('/api/auth', authRoutes);
 
-app.get('/messages', async (req, res) => {
-    try {
-        const messages = await Message.find()
-        res.json(messages)
-    } catch (error) {
-        res.status(500).json({
-            message: error.message
-        })
+const server = http.createServer(app);
+const io = new SocketIo(server, {
+    cors: {
+      origin: 'http://localhost:3000',
+      methods: ['GET', 'POST']
     }
-})
+});
 
-app.post('/messages', async (req, res) => {
-    try {
-        const {from, to, message} = req.body
-        const newMessage = new Message({from, to, message})
-        await newMessage.save()
-        res.status(201).json(newMessage)
-    } catch(error) {
-        res.status(500).json({
-            message: error.message
-        })
-    }
-})
-
-io.on('connection', socket => {
-    console.log('User connected')
-
-    socket.on('chat message', async message => {
-        console.log('Received message:', message);
-        const newMessage = new Message(message);
-        await newMessage.save();
-        console.log('Message saved:', newMessage);
-        io.emit('newMessage', newMessage);
-    });
-
-    socket.on('disconnect', () => {
-        console.log('User disconnected')
-    })
-})
-
+// O restante do seu servidor...
 server.listen(3001, () => {
-    console.log("server running on port 3001")
-})
+    console.log("Server running on port 3001");
+});
