@@ -1,6 +1,11 @@
-import React from 'react';
-import Register from '../src/app/components/Register.jsx';
+import Register from '../components/Register'
+import Header from '../components/Header'
 
-export default function RegisterPage() {
-  return <Register />;
+export default function register() {
+    return (
+        <div>
+            <Header />,
+            <Register />
+        </div>
+    )
 }

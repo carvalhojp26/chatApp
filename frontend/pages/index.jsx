@@ -1,6 +1,11 @@
-import React from 'react';
-import Login from '../src/app/components/Login.jsx';
+import Header from '../components/Header'
+import Login from '../components/Login';
 
 export default function Home() {
-  return <Login />;
-}
+  return (
+    <div>
+        <Header />
+        <Login />
+    </div>
+  );
+}   
