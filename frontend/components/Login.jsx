@@ -1,12 +1,40 @@
 import React, { useState } from 'react'
 import Link from 'next/link';
+import axios from 'axios'
 
 function Login () {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');         
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+
+        try {
+            const response = await axios.post('http://localhost:3001/api/auth/login', {
+                email,
+                password
+            });
+
+            if (response.data) {
+                console.log('Login successful:', response.data);
+                localStorage.setItem('token', response.data.token);
+                window.location.href = '/messages';
+            }
+        } catch (error) {
+            if (error.response) {
+                console.log('Login failed:', error.response.data.message);
+                setError(error.response.data.message);
+            } else {
+                console.log('Login request failed:', error.message);
+                setError('Login request failed. Please try again.');
+            }
+        }
+    };
 
     return (
-        <form className='flex items-center justify-center min-h-screen flex-col'>
+        <form onSubmit={handleSubmit} className='flex items-center justify-center min-h-screen flex-col'>
             <h2 className='text-light-blue text-5xl mb-8'>Login into your account</h2>
             <div>
                 <input

@@ -8,7 +8,6 @@ function Register () {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        console.log('form submitted', {userName, email, password})
         try{
             const response = await fetch('http://localhost:3001/api/auth/register', {
                 method: 'POST',
